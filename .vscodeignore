@@ -1,0 +1,13 @@
+.claude/**
+.codex/**
+src/**
+test/**
+tools/**
+scripts/**
+docs/**
+node_modules/**
+*.tsbuildinfo
+tsconfig*.json
+eslint.config.js
+AGENTS.md
+CLAUDE.md

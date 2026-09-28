@@ -1,0 +1,235 @@
+{
+  "name": "textoic-code",
+  "displayName": "Textoic: prose linter",
+  "description": "Lints English prose in Markdown and plain text as you type, with quick fixes, ignorable cases and AI rewrites through Ollama or OpenRouter.",
+  "version": "0.1.0",
+  "publisher": "textoic",
+  "license": "MIT",
+  "homepage": "https://textoic.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Textoic/textoic-code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Textoic/textoic-code/issues"
+  },
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "prose",
+    "writing",
+    "style",
+    "markdown",
+    "linter"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onLanguage:plaintext"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "textoic.manageRules",
+        "title": "Manage Rules",
+        "category": "Textoic"
+      },
+      {
+        "command": "textoic.rewriteSelection",
+        "title": "Rewrite Selection with AI",
+        "category": "Textoic"
+      },
+      {
+        "command": "textoic.setOpenRouterKey",
+        "title": "Set OpenRouter API Key",
+        "category": "Textoic"
+      },
+      {
+        "command": "textoic.chooseModel",
+        "title": "Choose Rewrite Model",
+        "category": "Textoic"
+      },
+      {
+        "command": "textoic.relint",
+        "title": "Lint Current File Now",
+        "category": "Textoic"
+      },
+      {
+        "command": "textoic.restart",
+        "title": "Restart Language Server",
+        "category": "Textoic"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "textoic.rewriteSelection",
+          "when": "editorHasSelection && config.textoic.rewrite.provider != off && resourceLangId =~ /^(markdown|plaintext)$/",
+          "group": "1_modification@9"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Textoic",
+      "properties": {
+        "textoic.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Lint prose in the languages below."
+        },
+        "textoic.languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "markdown",
+            "plaintext"
+          ],
+          "description": "Language ids to lint. Documents that are not Markdown are read as plain text."
+        },
+        "textoic.extends": {
+          "type": "string",
+          "enum": [
+            "recommended",
+            "all"
+          ],
+          "default": "recommended",
+          "enumDescriptions": [
+            "The rules enlint turns on by default.",
+            "Every rule."
+          ],
+          "description": "The rule preset your settings start from."
+        },
+        "textoic.locale": {
+          "type": "string",
+          "enum": [
+            "en-US",
+            "en-GB"
+          ],
+          "default": "en-US",
+          "description": "The English dialect no-mixed-dialects enforces."
+        },
+        "textoic.rules": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "Rule settings, eslint style: `\"off\"`, `\"hint\"`, `\"info\"`, `\"warn\"`, `\"error\"`, or `[severity, { \"ignore\": [...] }]`. A `textoic.config.json` in the project is applied on top. Use **Textoic: Manage Rules** to edit these with descriptions and examples.",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "info",
+                  "warn",
+                  "error"
+                ]
+              },
+              {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "info",
+                      "warn",
+                      "error"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ignore": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "textoic.debounceMs": {
+          "type": "number",
+          "default": 750,
+          "minimum": 100,
+          "description": "How long to wait after the last keystroke before linting again, in milliseconds."
+        },
+        "textoic.rewrite.provider": {
+          "type": "string",
+          "enum": [
+            "off",
+            "ollama",
+            "openrouter"
+          ],
+          "default": "off",
+          "enumDescriptions": [
+            "No AI rewrites.",
+            "A model running locally in Ollama.",
+            "A hosted model through OpenRouter; set the key with Textoic: Set OpenRouter API Key."
+          ],
+          "description": "Where AI rewrites run."
+        },
+        "textoic.rewrite.model": {
+          "type": "string",
+          "default": "",
+          "description": "The model for rewrites, for example qwen3:14b in Ollama or anthropic/claude-haiku-4.5 in OpenRouter. Use Textoic: Choose Rewrite Model to pick from a list."
+        },
+        "textoic.rewrite.ollamaUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:11434",
+          "description": "The Ollama server."
+        }
+      }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "textoic.config.json",
+          ".textoicrc.json"
+        ],
+        "url": "./schemas/textoic.config.schema.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --import tsx/esm test/**/*.test.ts",
+    "package": "npm run build && vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@textoic/enlint": "^0.2.0",
+    "@textoic/enlint-lsp": "^0.1.0",
+    "vscode-languageclient": "10.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.1",
+    "@types/vscode": "1.91.0",
+    "@vscode/vsce": "4.0.0",
+    "esbuild": "0.25.12",
+    "eslint": "9.31.0",
+    "eslint-config-pretty-strict": "10.0.0",
+    "prettier": "3.6.2",
+    "tsx": "4.20.3",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.37.0",
+    "vscode-jsonrpc": "^9.0.2"
+  }
+}

@@ -1,0 +1,536 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Textoic configuration",
+  "description": "Prose lint settings read by enlint-lsp, the Textoic editors and the enlint plugin for Claude Code and Codex.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "extends": {
+      "type": "string",
+      "enum": [
+        "recommended",
+        "all"
+      ],
+      "default": "recommended"
+    },
+    "locale": {
+      "type": "string",
+      "enum": [
+        "en-US",
+        "en-GB"
+      ],
+      "default": "en-US"
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "no-absolute-phrases": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-bad-sentence-structures": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-bad-words": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ignore": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Cases to leave alone: the expression for no-bad-words, the word after 'very' or 'not' for the other two."
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-explained-antonyms": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ignore": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Cases to leave alone: the expression for no-bad-words, the word after 'very' or 'not' for the other two."
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-explained-intensifiers": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ignore": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Cases to leave alone: the expression for no-bad-words, the word after 'very' or 'not' for the other two."
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-high-lexical-density": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "nounPercentage": {
+                      "type": "number"
+                    },
+                    "adjectivePercentage": {
+                      "type": "number"
+                    },
+                    "nounAndAdjectivePercentage": {
+                      "type": "number"
+                    },
+                    "minimumWords": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-mixed-dialects": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-negated-contrasts": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-nested-clauses": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-noun-clusters": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-passive-sentences": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-similes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        },
+        "no-special-punctuation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warn",
+                "error"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
