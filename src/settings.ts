@@ -3,10 +3,11 @@ import type {
   RuleSetting,
   TextoicConfig,
 } from "@textoic/enlint-lsp/config";
+import type { IgnoredInstances } from "@textoic/enlint-lsp/issues";
 import type { ClientSettings } from "@textoic/enlint-lsp/protocol";
 import type { ProviderSettings } from "@textoic/enlint-lsp/rewrite";
 
-export type RewriteProvider = "off" | "ollama" | "openrouter";
+export type RewriteProvider = "off" | "ollama" | "openrouter" | "vscode";
 
 export type ExtensionSettings = {
   enable: boolean;
@@ -28,10 +29,12 @@ export const configOf = (settings: ExtensionSettings): TextoicConfig => ({
 
 export const clientSettingsOf = (
   settings: ExtensionSettings,
+  ignoredInstances?: IgnoredInstances,
 ): ClientSettings => ({
   config: configOf(settings),
   debounceMs: settings.debounceMs,
   rewrite: settings.rewrite.provider !== "off",
+  ...(ignoredInstances == null ? {} : { ignoredInstances }),
 });
 
 export type DocumentFilter = { scheme: string; language: string };
@@ -43,7 +46,8 @@ export const documentSelectorOf = (languages: string[]): DocumentFilter[] =>
   ]);
 
 export type ProviderChoice =
-  | { ok: true; provider: ProviderSettings }
+  | { ok: true; route: "server"; provider: ProviderSettings }
+  | { ok: true; route: "vscode"; model: string }
   | { ok: false; problem: string };
 
 const refused = (problem: string): ProviderChoice => ({ ok: false, problem });
@@ -53,6 +57,7 @@ const ollamaChoice = ({ model, ollamaUrl }: ExtensionSettings["rewrite"]) =>
     ? refused("Choose an Ollama model for rewrites first.")
     : ({
         ok: true,
+        route: "server",
         provider: { kind: "ollama", model, baseUrl: ollamaUrl },
       } as const);
 
@@ -66,22 +71,30 @@ const openRouterChoice = (
 
   return model === ""
     ? refused("Choose an OpenRouter model for rewrites first.")
-    : { ok: true, provider: { kind: "openrouter", model, apiKey } };
+    : {
+        ok: true,
+        route: "server",
+        provider: { kind: "openrouter", model, apiKey },
+      };
 };
+
+const vscodeChoice = ({ model }: ExtensionSettings["rewrite"]) =>
+  ({ ok: true, route: "vscode", model }) as const;
 
 export const providerChoiceOf = (
   { rewrite }: ExtensionSettings,
   apiKey: string | undefined,
 ): ProviderChoice => {
-  if (rewrite.provider === "off") {
-    return refused(
-      "AI rewrites are off. Pick Ollama or OpenRouter in the Textoic settings.",
-    );
-  }
-
-  return rewrite.provider === "ollama"
-    ? ollamaChoice(rewrite)
-    : openRouterChoice(rewrite, apiKey);
+  const choices: Record<RewriteProvider, () => ProviderChoice> = {
+    off: () =>
+      refused(
+        "AI rewrites are off. Pick VS Code, Ollama or OpenRouter in the Textoic settings.",
+      ),
+    ollama: () => ollamaChoice(rewrite),
+    openrouter: () => openRouterChoice(rewrite, apiKey),
+    vscode: () => vscodeChoice(rewrite),
+  };
+  return choices[rewrite.provider]();
 };
 
 export const needsRestart = (

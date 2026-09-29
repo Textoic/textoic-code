@@ -2,7 +2,7 @@
   "name": "textoic-code",
   "displayName": "Textoic: prose linter",
   "description": "Lints English prose in Markdown and plain text as you type, with quick fixes, ignorable cases and AI rewrites through Ollama or OpenRouter.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "textoic",
   "license": "MIT",
   "homepage": "https://textoic.com",
@@ -14,7 +14,7 @@
     "url": "https://github.com/Textoic/textoic-code/issues"
   },
   "engines": {
-    "vscode": "^1.91.0"
+    "vscode": "^1.106.0"
   },
   "categories": [
     "Linters",
@@ -45,6 +45,11 @@
         "category": "Textoic"
       },
       {
+        "command": "textoic.rewriteAll",
+        "title": "Rewrite All Issues with AI",
+        "category": "Textoic"
+      },
+      {
         "command": "textoic.setOpenRouterKey",
         "title": "Set OpenRouter API Key",
         "category": "Textoic"
@@ -63,6 +68,52 @@
         "command": "textoic.restart",
         "title": "Restart Language Server",
         "category": "Textoic"
+      },
+      {
+        "command": "textoic.issues.toggle",
+        "title": "Toggle Issues Panel",
+        "category": "Textoic"
+      },
+      {
+        "command": "textoic.issues.showInView",
+        "title": "Show Issues in View",
+        "category": "Textoic",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "textoic.issues.showByType",
+        "title": "Group Issues by Type",
+        "category": "Textoic",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "textoic.issues.rewrite",
+        "title": "Rewrite with AI",
+        "category": "Textoic",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "textoic.issues.ignoreInstance",
+        "title": "Ignore This Instance",
+        "category": "Textoic",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "textoic.issues.ignoreCase",
+        "title": "Ignore This Case Everywhere",
+        "category": "Textoic",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "textoic.issues.disableRule",
+        "title": "Turn Off Rule",
+        "category": "Textoic",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "textoic.restoreIgnoredInstances",
+        "title": "Restore Ignored Instances in This File",
+        "category": "Textoic"
       }
     ],
     "menus": {
@@ -71,6 +122,87 @@
           "command": "textoic.rewriteSelection",
           "when": "editorHasSelection && config.textoic.rewrite.provider != off && resourceLangId =~ /^(markdown|plaintext)$/",
           "group": "1_modification@9"
+        },
+        {
+          "command": "textoic.rewriteAll",
+          "when": "config.textoic.rewrite.provider != off && resourceLangId =~ /^(markdown|plaintext)$/",
+          "group": "1_modification@10"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "textoic.rewriteAll",
+          "when": "editorIsOpen"
+        },
+        {
+          "command": "textoic.issues.rewrite",
+          "when": "false"
+        },
+        {
+          "command": "textoic.issues.ignoreInstance",
+          "when": "false"
+        },
+        {
+          "command": "textoic.issues.ignoreCase",
+          "when": "false"
+        },
+        {
+          "command": "textoic.issues.disableRule",
+          "when": "false"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "textoic.issues.showByType",
+          "when": "view == textoic.issues && textoic.issuesMode != byType",
+          "group": "navigation@1"
+        },
+        {
+          "command": "textoic.issues.showInView",
+          "when": "view == textoic.issues && textoic.issuesMode == byType",
+          "group": "navigation@1"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "textoic.issues.rewrite",
+          "when": "view == textoic.issues && viewItem =~ /^issue/ && config.textoic.rewrite.provider != off",
+          "group": "inline@1"
+        },
+        {
+          "command": "textoic.issues.ignoreInstance",
+          "when": "view == textoic.issues && viewItem =~ /^issue/",
+          "group": "inline@2"
+        },
+        {
+          "command": "textoic.issues.ignoreCase",
+          "when": "view == textoic.issues && viewItem == issue.case",
+          "group": "inline@3"
+        },
+        {
+          "command": "textoic.issues.disableRule",
+          "when": "view == textoic.issues && viewItem =~ /^issue/ || view == textoic.issues && viewItem == group",
+          "group": "inline@4"
+        },
+        {
+          "command": "textoic.issues.rewrite",
+          "when": "view == textoic.issues && viewItem =~ /^issue/ && config.textoic.rewrite.provider != off",
+          "group": "1_actions@1"
+        },
+        {
+          "command": "textoic.issues.ignoreInstance",
+          "when": "view == textoic.issues && viewItem =~ /^issue/",
+          "group": "1_actions@2"
+        },
+        {
+          "command": "textoic.issues.ignoreCase",
+          "when": "view == textoic.issues && viewItem == issue.case",
+          "group": "1_actions@3"
+        },
+        {
+          "command": "textoic.issues.disableRule",
+          "when": "view == textoic.issues && viewItem =~ /^issue/ || view == textoic.issues && viewItem == group",
+          "group": "1_actions@4"
         }
       ]
     },
@@ -172,12 +304,14 @@
           "type": "string",
           "enum": [
             "off",
+            "vscode",
             "ollama",
             "openrouter"
           ],
           "default": "off",
           "enumDescriptions": [
             "No AI rewrites.",
+            "A language model VS Code already has, such as GitHub Copilot's. VS Code asks for your consent the first time.",
             "A model running locally in Ollama.",
             "A hosted model through OpenRouter; set the key with Textoic: Set OpenRouter API Key."
           ],
@@ -186,7 +320,7 @@
         "textoic.rewrite.model": {
           "type": "string",
           "default": "",
-          "description": "The model for rewrites, for example qwen3:14b in Ollama or anthropic/claude-haiku-4.5 in OpenRouter. Use Textoic: Choose Rewrite Model to pick from a list."
+          "description": "The model for rewrites, for example qwen3:14b in Ollama or anthropic/claude-haiku-4.5 in OpenRouter. With the VS Code provider, leave it empty to use the first model VS Code offers. Use Textoic: Choose Rewrite Model to pick from a list."
         },
         "textoic.rewrite.ollamaUrl": {
           "type": "string",
@@ -203,7 +337,26 @@
         ],
         "url": "./schemas/textoic.config.schema.json"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "textoic",
+          "title": "Textoic",
+          "icon": "media/issues.svg"
+        }
+      ]
+    },
+    "views": {
+      "textoic": [
+        {
+          "id": "textoic.issues",
+          "name": "Issues",
+          "icon": "media/issues.svg",
+          "contextualTitle": "Textoic"
+        }
+      ]
+    }
   },
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -216,7 +369,7 @@
   },
   "dependencies": {
     "@textoic/enlint": "^0.2.0",
-    "@textoic/enlint-lsp": "^0.1.0",
+    "@textoic/enlint-lsp": "^0.2.0",
     "vscode-languageclient": "10.1.2"
   },
   "devDependencies": {

@@ -16,12 +16,18 @@ import {
   chooseModel,
   disableRule,
   ignoreCase,
+  ignoreInstance,
   relint,
+  restoreIgnoredInstances,
   rewrite,
   rewriteSelection,
   setOpenRouterKey,
 } from "./commands.js";
 import { readSettings } from "./configuration.js";
+import { IgnoredInstanceStore } from "./ignored-instances.js";
+import { registerIssuesView } from "./issues-view.js";
+import { registerRewritePreview } from "./rewrite-preview.js";
+import { rewriteAll } from "./rewrite-all.js";
 import { manageRules } from "./rules-manager.js";
 import {
   clientSettingsOf,
@@ -39,9 +45,14 @@ const serverOptions = (context: ExtensionContext): ServerOptions => {
   return { run, debug: run };
 };
 
+let instances: IgnoredInstanceStore | undefined;
+
+const clientSettingsNow = (settings: ExtensionSettings) =>
+  clientSettingsOf(settings, instances?.all());
+
 const clientOptions = (settings: ExtensionSettings): LanguageClientOptions => ({
   documentSelector: documentSelectorOf(settings.languages),
-  initializationOptions: clientSettingsOf(settings),
+  initializationOptions: clientSettingsNow(settings),
   synchronize: {
     fileEvents: workspace.createFileSystemWatcher(
       "**/{textoic.config.json,.textoicrc.json}",
@@ -74,7 +85,7 @@ const stopClient = async () => {
 
 const pushSettings = async (settings: ExtensionSettings) => {
   await client?.sendNotification(DidChangeConfigurationNotification.type, {
-    settings: { textoic: clientSettingsOf(settings) },
+    settings: { textoic: clientSettingsNow(settings) },
   });
 };
 
@@ -106,12 +117,24 @@ const withClient =
     }
   };
 
-const registerCommands = (context: ExtensionContext): Disposable[] => [
+const registerCommands = (
+  context: ExtensionContext,
+  store: IgnoredInstanceStore,
+): Disposable[] => [
   commands.registerCommand(Commands.ignoreCase, ignoreCase),
+  commands.registerCommand(Commands.ignoreInstance, ignoreInstance(store)),
+  commands.registerCommand(
+    "textoic.restoreIgnoredInstances",
+    restoreIgnoredInstances(store),
+  ),
   commands.registerCommand(Commands.disableRule, disableRule),
   commands.registerCommand(
     Commands.rewrite,
     withClient((active) => rewrite(active, context)),
+  ),
+  commands.registerCommand(
+    Commands.rewriteAll,
+    withClient((active) => rewriteAll(active, context)),
   ),
   commands.registerCommand(
     "textoic.rewriteSelection",
@@ -131,8 +154,13 @@ const registerCommands = (context: ExtensionContext): Disposable[] => [
 ];
 
 export const activate = async (context: ExtensionContext) => {
+  const store = new IgnoredInstanceStore(context.workspaceState);
+  instances = store;
   context.subscriptions.push(
-    ...registerCommands(context),
+    ...registerCommands(context, store),
+    ...registerIssuesView(context.workspaceState),
+    store.onDidChange(() => pushSettings(readSettings())),
+    registerRewritePreview(),
     onSettingsChange(context),
   );
   await startClient(context);

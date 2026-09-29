@@ -60,6 +60,7 @@ describe("providerChoiceOf", () => {
       ),
       {
         ok: true,
+        route: "server",
         provider: {
           kind: "ollama",
           model: "qwen3:14b",
@@ -80,7 +81,24 @@ describe("providerChoiceOf", () => {
   it("builds OpenRouter settings with the stored key", () => {
     assert.deepEqual(
       providerChoiceOf(settings({ provider: "openrouter", model: "m" }), "sk"),
-      { ok: true, provider: { kind: "openrouter", model: "m", apiKey: "sk" } },
+      {
+        ok: true,
+        route: "server",
+        provider: { kind: "openrouter", model: "m", apiKey: "sk" },
+      },
+    );
+  });
+});
+
+describe("the VS Code provider", () => {
+  it("routes to VS Code's language models without a key or a model", () => {
+    assert.deepEqual(
+      providerChoiceOf(settings({ provider: "vscode" }), undefined),
+      {
+        ok: true,
+        route: "vscode",
+        model: "",
+      },
     );
   });
 });
