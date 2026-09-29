@@ -368,8 +368,8 @@
     "vscode:prepublish": "npm run build"
   },
   "dependencies": {
-    "@textoic/enlint": "^0.2.0",
-    "@textoic/enlint-lsp": "^0.2.0",
+    "@textoic/enlint": "^0.2.1",
+    "@textoic/enlint-lsp": "^0.2.1",
     "vscode-languageclient": "10.1.2"
   },
   "devDependencies": {

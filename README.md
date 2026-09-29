@@ -112,7 +112,7 @@ your user settings; VS Code validates it as you edit it.
 }
 ```
 
-The [enlint plugin for Claude Code and Codex](https://github.com/Textoic/enlint-skill)
+The [enlint plugin for Claude Code and Codex](https://github.com/Textoic/textoic-skill)
 reads the same file, so the agents stop flagging what you told the editor to
 ignore.
 
