@@ -23,6 +23,7 @@ import {
   rewriteSelection,
   setOpenRouterKey,
 } from "./commands.js";
+import { applyAll } from "./apply-all.js";
 import { readSettings } from "./configuration.js";
 import { IgnoredInstanceStore } from "./ignored-instances.js";
 import { registerIssuesView } from "./issues-view.js";
@@ -135,6 +136,10 @@ const registerCommands = (
   commands.registerCommand(
     Commands.rewriteAll,
     withClient((active) => rewriteAll(active, context)),
+  ),
+  commands.registerCommand(
+    Commands.applyAll,
+    withClient((active) => applyAll(active, context)),
   ),
   commands.registerCommand(
     "textoic.rewriteSelection",

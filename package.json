@@ -50,6 +50,23 @@
         "category": "Textoic"
       },
       {
+        "command": "textoic.applyAll",
+        "title": "Apply All Fixes…",
+        "category": "Textoic"
+      },
+      {
+        "command": "textoic.issues.applyAll",
+        "title": "Apply All…",
+        "category": "Textoic",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "textoic.issues.applyAllInFile",
+        "title": "Apply All in This File…",
+        "category": "Textoic",
+        "icon": "$(check-all)"
+      },
+      {
         "command": "textoic.setOpenRouterKey",
         "title": "Set OpenRouter API Key",
         "category": "Textoic"
@@ -127,6 +144,11 @@
           "command": "textoic.rewriteAll",
           "when": "config.textoic.rewrite.provider != off && resourceLangId =~ /^(markdown|plaintext)$/",
           "group": "1_modification@10"
+        },
+        {
+          "command": "textoic.applyAll",
+          "when": "resourceLangId =~ /^(markdown|plaintext)$/",
+          "group": "1_modification@11"
         }
       ],
       "commandPalette": [
@@ -149,9 +171,22 @@
         {
           "command": "textoic.issues.disableRule",
           "when": "false"
+        },
+        {
+          "command": "textoic.issues.applyAll",
+          "when": "false"
+        },
+        {
+          "command": "textoic.applyAll",
+          "when": "editorIsOpen"
         }
       ],
       "view/title": [
+        {
+          "command": "textoic.issues.applyAllInFile",
+          "when": "view == textoic.issues",
+          "group": "navigation@0"
+        },
         {
           "command": "textoic.issues.showByType",
           "when": "view == textoic.issues && textoic.issuesMode != byType",
@@ -185,6 +220,11 @@
           "group": "inline@4"
         },
         {
+          "command": "textoic.issues.applyAll",
+          "when": "view == textoic.issues && viewItem == group || view == textoic.issues && viewItem == issue.case",
+          "group": "inline@0"
+        },
+        {
           "command": "textoic.issues.rewrite",
           "when": "view == textoic.issues && viewItem =~ /^issue/ && config.textoic.rewrite.provider != off",
           "group": "1_actions@1"
@@ -203,6 +243,11 @@
           "command": "textoic.issues.disableRule",
           "when": "view == textoic.issues && viewItem =~ /^issue/ || view == textoic.issues && viewItem == group",
           "group": "1_actions@4"
+        },
+        {
+          "command": "textoic.issues.applyAll",
+          "when": "view == textoic.issues && viewItem == group || view == textoic.issues && viewItem == issue.case",
+          "group": "1_actions@0"
         }
       ]
     },

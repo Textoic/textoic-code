@@ -21,7 +21,14 @@ describe("rewriteAllSummary", () => {
     assert.equal(summary.passed.length, 2);
     assert.equal(
       summary.message,
-      "Rewrote 2 paragraphs: 4 problems before, 0 after. Skipped 1 paragraph whose rewrite did not pass (the model returned nothing).",
+      "Rewrote 2 parts. Skipped 1 part whose rewrite did not pass (the model returned nothing).",
+    );
+  });
+
+  it("counts the problems a rewrite left behind", () => {
+    assert.equal(
+      rewriteAllSummary([{ ...rewrite(true), after: [1] }]).message,
+      "Rewrote 1 part. 1 problem left.",
     );
   });
 

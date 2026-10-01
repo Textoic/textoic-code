@@ -24,7 +24,7 @@ const costNote = (rewrites: Judged[]) => {
 const skippedNote = (rejected: Judged[]) =>
   rejected.length === 0
     ? ""
-    : ` Skipped ${plural(rejected.length, "paragraph")} whose rewrite did not pass (${rejected[0]?.reason ?? "unknown reason"}).`;
+    : ` Skipped ${plural(rejected.length, "part")} whose rewrite did not pass (${rejected[0]?.reason ?? "unknown reason"}).`;
 
 const changes = ({ accepted, replacement, original }: Judged) =>
   accepted && replacement !== original;
@@ -43,10 +43,10 @@ export const rewriteAllSummary = <T extends Judged>(
     return { passed, message: nothingPassed(rewrites, rejected) };
   }
 
-  const before = sumOf(passed, (item) => item.before.length);
   const after = sumOf(passed, (item) => item.after.length);
+  const left = after === 0 ? "" : ` ${plural(after, "problem")} left.`;
   return {
     passed,
-    message: `Rewrote ${plural(passed.length, "paragraph")}: ${plural(before, "problem")} before, ${after} after.${skippedNote(rejected)}${costNote(rewrites)}`,
+    message: `Rewrote ${plural(passed.length, "part")}.${left}${skippedNote(rejected)}${costNote(rewrites)}`,
   };
 };

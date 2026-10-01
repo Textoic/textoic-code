@@ -5,6 +5,19 @@ the top, dated, one finding each.
 
 ## Log
 
+### 2026-09-30, "Apply all" asks the server for the fixes and applies them itself
+
+The server's code actions carry `textoic.applyAll` with a scope (a case, a
+rule, or `{}` for the file). The command asks `enlint/fixAll` for the edits,
+offers "Fixes only" and, when a rewrite provider is set and some issues have
+no exact fix, "Fixes, then AI rewrites", then applies the edits as one
+`WorkspaceEdit` so a single undo takes them back. The rewrite step reuses
+"Rewrite all issues" with the same scope; the language client sends the
+pending `didChange` before the next request, so the server rewrites the text
+with the fixes already in. The quick pick lives in `apply-all.ts`; the
+choices and messages live in `apply-all-model.ts`, which does not import
+`vscode`, so the tests reach them.
+
 ### 2026-09-29, the Issues panel is a tree view in the secondary side bar
 
 `contributes.viewsContainers.secondarySidebar` became a stable contribution

@@ -51,11 +51,17 @@ and run `code --install-extension textoic-code-<version>.vsix`, or use
   rewrite that comes back empty, cut off, far longer or shorter, or with more
   problems than it started with is flagged before you see it. Every rewrite
   opens as a diff, and nothing changes until you apply it.
+- **Apply all** from the quick fixes (for one case such as "dirty", for a
+  rule, or for the whole file), from the check-all button on a rule or case in
+  the Issues panel and at its top, or with **Textoic: Apply All Fixes…**. Pick
+  **Fixes only** to apply every exact fix the rules offer in one undoable
+  edit, or **Fixes, then AI rewrites** to apply them and then rewrite the
+  parts that still have issues with the model.
 - **Rewrite all issues at once** with **Rewrite all issues with AI** in the
-  quick fixes, the editor's context menu or the command palette. Textoic
-  rewrites each paragraph that has a problem, checks each answer on its own,
-  and shows the ones that passed in a single diff. It skips a paragraph whose
-  rewrite failed the check and tells you why.
+  editor's context menu or the command palette. Textoic packs the paragraphs
+  with problems into parts of about 500 words, rewrites each part, checks each
+  answer on its own, and shows the ones that passed in a single diff. It skips
+  a part whose rewrite failed the check and tells you why.
 
 ### Rewrites and VS Code's own "Fix"
 

@@ -247,6 +247,25 @@ const ruleOf = (node: Node) =>
 const disableRule = (node: Node) =>
   commands.executeCommand(Commands.disableRule, { rule: ruleOf(node) });
 
+const applyAllFor = async (node: Node) => {
+  const uri = window.activeTextEditor?.document.uri.toString();
+  if (uri == null) {
+    return;
+  }
+
+  const issue = issueOf(node);
+  const target =
+    issue?.case == null
+      ? { scope: { rule: ruleOf(node) }, label: ruleNameOf(ruleOf(node)) }
+      : {
+          scope: { rule: issue.rule, case: issue.case },
+          label: `“${issue.case}”`,
+        };
+  await commands.executeCommand(Commands.applyAll, { uri, ...target });
+};
+
+const applyAllInFile = () => commands.executeCommand(Commands.applyAll);
+
 const toggle = (view: IssuesView) => () =>
   view.view.visible
     ? commands.executeCommand("workbench.action.closeAuxiliaryBar")
@@ -275,5 +294,7 @@ export const registerIssuesView = (state: Memento): Disposable[] => {
     commands.registerCommand("textoic.issues.ignoreInstance", ignoreInstance),
     commands.registerCommand("textoic.issues.ignoreCase", ignoreCase),
     commands.registerCommand("textoic.issues.disableRule", disableRule),
+    commands.registerCommand("textoic.issues.applyAll", applyAllFor),
+    commands.registerCommand("textoic.issues.applyAllInFile", applyAllInFile),
   ];
 };

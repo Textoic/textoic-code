@@ -5,6 +5,7 @@ import {
   type RewriteProgressParams,
   type RewriteResult,
 } from "@textoic/enlint-lsp/protocol";
+import type { Scope } from "@textoic/enlint-lsp/fixes";
 import {
   rewriteDocument,
   type ProviderSettings,
@@ -37,12 +38,18 @@ import { rewriteAllSummary } from "./rewrite-summary.js";
 
 type Reporter = Progress<{ message?: string; increment?: number }>;
 
+type Run = {
+  token: CancellationToken;
+  onProgress: (progress: RewriteProgress) => void;
+  scope: Scope;
+};
+
 const reportTo = (progress: Reporter) => {
   let reported = 0;
   return ({ done, total }: RewriteProgress) => {
     const percent = total === 0 ? 100 : (done / total) * 100;
     progress.report({
-      message: `${done} of ${total} paragraphs`,
+      message: `${done} of ${total} parts`,
       increment: percent - reported,
     });
     reported = percent;
@@ -53,13 +60,7 @@ const serverRewriteAll = async (
   client: LanguageClient,
   uri: string,
   provider: ProviderSettings,
-  {
-    token,
-    onProgress,
-  }: {
-    token: CancellationToken;
-    onProgress: (progress: RewriteProgress) => void;
-  },
+  { token, onProgress, scope }: Run,
 ) => {
   const listening = client.onNotification(
     Methods.rewriteProgress,
@@ -72,7 +73,7 @@ const serverRewriteAll = async (
   try {
     const { rewrites } = await client.sendRequest<RewriteAllResult>(
       Methods.rewriteAll,
-      { uri, provider },
+      { uri, provider, scope },
       token,
     );
     return rewrites;
@@ -85,13 +86,7 @@ const languageModelRewriteAll = async (
   client: LanguageClient,
   uri: string,
   modelId: string,
-  {
-    token,
-    onProgress,
-  }: {
-    token: CancellationToken;
-    onProgress: (progress: RewriteProgress) => void;
-  },
+  { token, onProgress, scope }: Run,
 ): Promise<RewriteResult[] | undefined> => {
   const model = await modelFor(modelId);
   if (model == null) {
@@ -105,6 +100,7 @@ const languageModelRewriteAll = async (
     lint: serverLint(client, document, token),
     concurrency: 2,
     onProgress,
+    scope,
   });
   return rewrites.map((result) => ({
     ...result,
@@ -121,15 +117,16 @@ const rewriteAllWith = (
   client: LanguageClient,
   uri: string,
   choice: ReadyChoice,
+  scope: Scope,
 ) =>
   window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Rewriting all issues with ${modelLabel(choice)}`,
+      title: `Rewriting with ${modelLabel(choice)}`,
       cancellable: true,
     },
     (progress, token) => {
-      const run = { token, onProgress: reportTo(progress) };
+      const run = { token, onProgress: reportTo(progress), scope };
       return choice.route === "vscode"
         ? languageModelRewriteAll(client, uri, choice.model, run)
         : serverRewriteAll(client, uri, choice.provider, run);
@@ -149,17 +146,18 @@ const present = async (uri: string, rewrites: RewriteResult[]) => {
   );
 };
 
-const runRewriteAll = async (
+export const runRewriteAll = async (
   client: LanguageClient,
   context: ExtensionContext,
   uri: string,
+  scope: Scope = {},
 ) => {
   const choice = await readyChoice(context);
   if (choice == null) {
     return;
   }
 
-  const rewrites = await rewriteAllWith(client, uri, choice);
+  const rewrites = await rewriteAllWith(client, uri, choice, scope);
   if (rewrites != null) {
     await present(uri, rewrites);
   }
@@ -172,7 +170,7 @@ export const rewriteAll =
   (args?: RewriteAllArguments) => {
     const uri = args?.uri ?? activeUri();
     if (uri != null) {
-      runRewriteAll(client, context, uri).catch(reportFailure);
+      runRewriteAll(client, context, uri, args?.scope).catch(reportFailure);
     }
 
     return Promise.resolve();
